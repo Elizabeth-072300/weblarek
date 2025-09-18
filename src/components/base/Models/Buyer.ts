@@ -1,10 +1,10 @@
 import { IBuyer, TPayment } from '../../../types';
 
 export class Buyer {
-  private payment: TPayment | null = null;
-  private email: string = '';
-  private phone: string = '';
-  private address: string = '';
+ payment: TPayment | null = null;
+ email: string = '';
+ phone: string = '';
+ address: string = '';
 
   setBuyerData(data: IBuyer): void {
     this.payment = data.payment;
