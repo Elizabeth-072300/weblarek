@@ -98,3 +98,86 @@ Presenter - презентер содержит основную логику п
 `emit<T extends object>(event: string, data?: T): void` - инициализация события. При вызове события в метод передается название события и объект с данными, который будет использован как аргумент для вызова обработчика.  
 `trigger<T extends object>(event: string, context?: Partial<T>): (data: T) => void` - возвращает функцию, при вызове которой инициализируется требуемое в параметрах событие с передачей в него данных из второго параметра.
 
+##### Данные
+Описание интерфейсов и типов, используемых при работе с товарами, корзиной и оформлением заказа.
+
+Объект товара, который приходит от сервера и отображается в каталоге, корзине и на странице товара:
+`interface IProduct` {
+  id: string;
+  description: string;
+  image: string;
+  title: string;
+  category: string;
+  price: number | null;
+}
+
+Информация, запрашиваемая у пользователя при оформлении заказа:
+`interface IBuyer` {
+  payment: TPayment;
+  email: string;
+  phone: string;
+  address: string;
+}
+
+Ограниченное множество допустимых способов оплаты:
+`type TPayment` = 'card' | 'cash';
+
+Один товар, добавленный в корзину. Содержит сам товар и его количество:
+`interface ICartItem` {
+  product: IProduct;
+  quantity: number;   
+}
+
+Данные, которые отправляются на сервер при оформлении заказа:
+`interface IOrderRequest` {
+  products: string[];
+  user: IBuyer
+}
+
+`interface IOrderResponse` {
+  id: string;
+  total: number;
+}
+
+###### Модели данных
+`class ProductCatalog` {
+    conctructor()
+    `private products: IProduct[] = []` // Хранит массив всех доступных товаров в приложении
+    `private selectedProduct: IProduct | null = null` // Хранит товар, выбранный пользователем для отображения на странице деталей
+    `setProducts(products: IProduct[]): void` // Сохраняет список товаров в модель
+    `getProducts(): IProduct[]` // Возвращает массив всех товаров, хранящихся в модели
+    `getProductById(id: string): IProduct | undefined` // Ищет и возвращает товар по его id
+    `setSelectedProduct(product: IProduct): void` // Сохраняет товар как выбранный для детального просмотра
+    `getSelectedProduct(): IProduct | null` // Возвращает товар, выбранный для подробного отображения
+} - Класс отвечает за хранение всех товаров, полученных от сервера, а также управление выбранным товаром для подробного отображения.
+
+`class Cart` {
+    constructor()
+    `private items: ICartItem[] = [] `// Массив товаров, добавленных в корзину.
+    `addItem(product: IProduct): void` // Добавляет товар в корзину. Если такой товар уже есть — увеличивает его количество.
+    `removeItem(productId: string): void` // Удаляет товар из корзины по его id.
+    `clear(): void` // Oчистка корзины.
+    `getTotalPrice(): number` // Возвращает общую стоимость всех товаров в корзине.
+    `getTotalCount(): number` // Возвращает общее количество товаров в корзине.
+    `hasItem(productId: string): boolean` // Проверяет наличие товара в корзине по его id.
+} - Класс отвечает за хранение и управление товарами, выбранными пользователем для покупки.
+
+`class Buyer` {
+    constructor()
+    `private payment: TPayment | null = null` // способ оплаты
+    `private email: string = ''` // Email покупателя
+    `private phone: string = ''` // номер телефона
+    `private address: string = ''` // адрес доставки
+    `setBuyerData(data: IBuyer): void` // Сохраняет все поля покупателя сразу.
+    `getBuyerData(): IBuyer` // Получение всех данных покупателя.
+    `clear(): void` // Очищает все данные покупателя.
+    `validate(): boolean` // Проверяет, заполнены ли корректно все обязательные поля.
+} - Класс отвечает за хранение, получение, очистку и валидацию данных покупателя, необходимых для оформления заказа.
+
+###### Слой коммуникации
+`class ApiService`{
+    constructor(api: IApi)
+    `private api: IApi` // хранит переданный объект API для использования в методах.
+    `async getProducts(): Promise<IProduct[]>` // Выполняет GET-запрос к эндпоинту /product/ и возвращает массив товаров (IProduct[]), полученных с сервера.
+    `async sendOrder(order: IOrderRequest): Promise<IOrderResponse> `// Выполняет POST-запрос к эндпоинту /order/, отправляя данные заказа в формате IOrderRequest. Возвращает ответ сервера (например, статус успешной отправки).
+} — отвечает за взаимодействие с сервером через API.
