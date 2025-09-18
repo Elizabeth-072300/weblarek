@@ -1,5 +1,5 @@
 # Проектная работа "Веб-ларек"
-
+https://github.com/Elizabeth-072300/weblarek
 Стек: HTML, SCSS, TS, Vite
 
 Структура проекта:
